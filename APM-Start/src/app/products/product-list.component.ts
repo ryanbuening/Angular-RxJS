@@ -3,7 +3,7 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { EMPTY, Subject, combineLatest, BehaviorSubject } from 'rxjs';
 
 import { ProductService } from './product.service';
-import { catchError, map, startWith } from 'rxjs/operators';
+import { catchError, map, startWith, filter } from 'rxjs/operators';
 import { ProductCategoryService } from '../product-categories/product-category.service';
 
 @Component({
@@ -12,7 +12,7 @@ import { ProductCategoryService } from '../product-categories/product-category.s
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProductListComponent {
-    pageTitle = 'Product List';
+    pageTitle = 'Product List!';
     private errorMessageSubject = new Subject<string>();
     errorMessage$ = this.errorMessageSubject.asObservable();
     // selectedCategoryId = 1;
@@ -41,6 +41,17 @@ export class ProductListComponent {
                 this.errorMessageSubject.next(err);
                 return EMPTY;
             })
+        );
+
+    vm$ = combineLatest([
+        this.products$,
+        this.categories$
+    ])
+        .pipe(
+            filter(([products]) => Boolean(products)),
+            map(([products, categories]) =>
+                ({ products, categories })
+            )
         );
 
     // productsSimpleFilter$ = this.productService.productsWithCategory$
